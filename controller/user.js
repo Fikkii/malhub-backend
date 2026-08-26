@@ -21,7 +21,7 @@ function jwtMiddleware(req, res, next) {
   }
 }
 
-userRouter.get('/', (req, res) => {
+userRouter.get('/', jwtMiddleware, (req, res) => {
   res.json(users);
 });
 

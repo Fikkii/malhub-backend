@@ -4,21 +4,28 @@ const authRouter = express.Router();
 const { users } = require('./user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { client, run } = require('../db');
 
 
-authRouter.post('/signup', (req, res) => {
+authRouter.post('/signup', async (req, res) => {
   const { fullname, email, password } = req.body;
 
   const passwordHash = bcrypt.hashSync(password, 10);
 
-  users.push({ fullname, email, password: passwordHash });
+  await client.connect();
+
+    await client.db("Treasure").collection("users").insertOne({ fullname: fullname, email: email, password: passwordHash  });
+
   res.redirect('/login.html');
 });
 
-authRouter.post('/login', (req, res) => {
+authRouter.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    const user = users.find(u => u.email === email);
+  await client.connect();
+
+    const user = await client.db("Treasure").collection("users").findOne({ email: email });
+    
     if (!user) {
         return res.status(401).send('Invalid email or password');
     }
@@ -28,7 +35,7 @@ authRouter.post('/login', (req, res) => {
         return res.status(401).send('Invalid email or password');
     }
 
-    var token = jwt.sign({ email: user.email }, 'thisisasecretkey', { expiresIn: '1h' });
+    let token = jwt.sign({ email: user.email }, 'thisisasecretkey', { expiresIn: '1h' });
     
     res.json({
         email: user.email,
