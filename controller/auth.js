@@ -4,19 +4,17 @@ const authRouter = express.Router();
 const { users } = require('./user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { client, run } = require('../db');
-
+const User = require('../models/user');
 
 authRouter.post('/signup', async (req, res) => {
   const { fullname, email, password } = req.body;
 
   const passwordHash = bcrypt.hashSync(password, 10);
 
-  await client.connect();
-
-    await client.db("Treasure").collection("users").insertOne({ fullname: fullname, email: email, password: passwordHash  });
-
-  res.redirect('/login.html');
+  User.create({ fullname, email, password: passwordHash }).then(() => {
+    res.redirect('/login.html');
+  }).catch(err => console.error('Error creating user:', err));
+  
 });
 
 authRouter.post('/login', async (req, res) => {

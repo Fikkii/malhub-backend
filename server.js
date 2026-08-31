@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
-const { run } = require('./db');
+const db = require('./db');
 
 const {userRouter} = require('./controller/user');
 const authRouter = require('./controller/auth');
